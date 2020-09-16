@@ -51,8 +51,8 @@ class Helper
         $result = [];
         /** @var ValidateFailedException $e */
         foreach ($es->exceptions as $e) {
-            $name = $this->transName[$e->path];
-            $template = $this->message[$e->name];
+            $name = $this->transName[$e->path] ?? $e->path;
+            $template = $this->message[$e->name] ?? '{$0} error';
             $params = [$name, ...$e->params];
             $message = preg_replace_callback('@{\$([\d])}@', function ($matches) use ($params) {
                 return $params[$matches[1]];
