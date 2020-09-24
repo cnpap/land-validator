@@ -84,7 +84,9 @@ class Validator
             }
             return;
         }
-        $rules = preg_replace('@[&]?[&]?must[&]?[&]?@', '', $rules);
+        if ($info['count'] === 0) {
+            $rules = preg_replace('@[&]?[&]?must[&]?[&]?@', '', $rules);
+        }
         if ($firstPath === '*') {
             if ($info['count']) {
                 foreach ($data as $datum) {
