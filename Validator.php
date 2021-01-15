@@ -81,6 +81,10 @@ class Validator
                         }
                     }
                 } else {
+                    $endDatum = $data[$firstPath] ?? null;
+                    if (!$endDatum || is_string($endDatum)) {
+                        throw new Failed('', 'must');
+                    }
                     if ($info['count']) {
                         $this->stack($data[$firstPath], $info, $rules, $level);
                     } else {

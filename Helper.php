@@ -37,8 +37,14 @@ class Helper
 
     function fmt(Failed $e, $prefix = ''): array
     {
-        $path     = $prefix . $e->prefix;
-        $path     = $path ? $path . '.' . $e->path : $e->path;
+        $path = $prefix . $e->prefix;
+        if ($path) {
+            if ($e->path) {
+                $path .= '.' . $e->path;
+            }
+        } else {
+            $path = $e->path;
+        }
         $name     = $this->trans[$path] ?? $path;
         $template = $this->message[$e->name];
         $params   = [$name, ...$e->params];
