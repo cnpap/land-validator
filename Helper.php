@@ -4,14 +4,14 @@
 namespace LandValidator;
 
 
-use LandValidator\Exception\ValidateFailedException;
-use LandValidator\Exception\ValidateFailedListException;
+use Generator;
+use LandValidator\Exception\Failed;
+use LandValidator\Exception\FailedList;
 
 class Helper
 {
     private array $message = [];
-
-    private array $transName = [];
+    private array $trans   = [];
 
     function useMessage(array $message)
     {
@@ -24,41 +24,52 @@ class Helper
         }
     }
 
-    function useTransName(array $transName)
+    function useTrans(array $trans)
     {
-        if (count($this->transName) === 0) {
-            $this->transName = $transName;
+        if (count($this->trans) === 0) {
+            $this->trans = $trans;
         } else {
-            foreach ($transName as $i => $v) {
-                $this->transName[$i] = $v;
+            foreach ($trans as $i => $v) {
+                $this->trans[$i] = $v;
             }
         }
     }
 
-    function fmtFailed(ValidateFailedException $e)
+    function fmt(Failed $e, $prefix = ''): array
     {
-        $name = $this->transName[$e->path];
+        $path     = $prefix . $e->prefix;
+        $path     = $path ? $path . '.' . $e->path : $e->path;
+        $name     = $this->trans[$path] ?? $path;
         $template = $this->message[$e->name];
-        $params = [$name, ...$e->params];
-        $message = preg_replace_callback('@{\$([\d])}@', function ($matches) use ($params) {
+        $params   = [$name, ...$e->params];
+        $message  = preg_replace_callback('@{\$([\d])}@', function ($matches) use ($params) {
             return $params[$matches[1]];
         }, $template);
-        return [$e->path => $message];
+        return [$path => $message];
     }
 
-    function fmtFailedList(ValidateFailedListException $es)
+    function fmtList(FailedList $es): array
     {
         $result = [];
-        /** @var ValidateFailedException $e */
-        foreach ($es->exceptions as $e) {
-            $name = $this->transName[$e->path] ?? $e->path;
-            $template = $this->message[$e->name] ?? '{$0} error';
-            $params = [$name, ...$e->params];
-            $message = preg_replace_callback('@{\$([\d])}@', function ($matches) use ($params) {
-                return $params[$matches[1]];
-            }, $template);
-            $result[$e->path] = $message;
+        foreach ($this->errMap($es) as $fail) {
+            $result[key($fail)] = current($fail);
         }
         return $result;
+    }
+
+    function errMap(FailedList $es): Generator
+    {
+        foreach ($es->exceptions as $e) {
+            if ($e instanceof Failed) {
+                yield $this->fmt($e, $es->prefix);
+            } else if ($e instanceof FailedList) {
+                if ($es->prefix !== '') {
+                    $e->prefix = $es->prefix;
+                }
+                foreach ($this->errMap($e) as $fail) {
+                    yield $fail;
+                }
+            }
+        }
     }
 }
