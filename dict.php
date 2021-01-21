@@ -7,6 +7,8 @@ return [
         'arr'       => fn($data) => is_array($data),
         'float'     => fn($data) => is_float($data),
         'min'       => fn($data, $param) => $data >= $param,
+        'strMin'    => fn($data, $param) => strlen($data) >= $param,
+        'arrMin'    => fn($data, $param) => count($data) >= $param,
         'max'       => fn($data, $param) => $data <= $param,
         'strMax'    => fn($data, $param) => strlen($data) <= $param,
         'arrMax'    => fn($data, $param) => count($data) <= $param,
@@ -28,7 +30,7 @@ return [
         'date3'     => fn($data) => (bool)preg_match('@^\d{4}-\d{2}-\d{2}$@', $data),
         'charDate1' => fn($data) => (bool)preg_match('@^(day)|(month)|(year)$@', $data),
         'md5'       => fn($data) => (bool)preg_match('@^[a-z0-9]{32}$@', $data),
-        'code69'    => fn($data) => (bool)preg_match('@^69[0-9]{11}$@', $data)
+        'code69'    => fn($data) => (bool)preg_match('@^69[0-9]{11}$@', $data),
     ],
     'trans'   => [
         'account'          => '用户账号',
@@ -64,6 +66,8 @@ return [
         'arr'    => '{$0} 应该是数组',
         'float'  => '{$0} 应该是浮点数',
         'min'    => '{$0} 不能小于 {$1}',
+        'strMin' => '{$0} 不能少于 {$1} 个字符',
+        'arrMin' => '{$0} 不能少于 {$1} 个元素',
         'max'    => '{$0} 不能大于 {$1}',
         'strMax' => '{$0} 不能多于 {$1} 个字符',
         'arrMax' => '{$0} 不能多于 {$1} 个元素',
